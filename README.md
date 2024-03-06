@@ -1,4 +1,4 @@
-# Interfacting with Hardware in the Frontend
+# Interacting with Hardware in the Frontend
 
 - Sharing experiences I made
 - Showing some live examples

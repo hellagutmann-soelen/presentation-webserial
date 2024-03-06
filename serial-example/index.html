@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Serial</title>
+</head>
+<body>
+    <p class="bubble">
+        Hello again! Time to light up an LED. 💡
+    </p>
+
+    <noscript>
+        <p class="notice bubble">
+            I'm sorry! For this to actully work you have to enable JavaScript in your browser.
+        </p>
+    </noscript>
+    <button id="get-reader">Connect</button>
+
+    <figure class="fast animated">
+        <input id="dimmer" type="range" min="0" max="255" value="0" class="demo bubble" />
+        <img id="wheel" src="./wheel.png">
+        <figcaption><label for="led-dimmer">LED dimmer<br /><small><span>0</span> % brightness</small></label>
+        </figcaption>
+    </figure>
+
+    <script>
+        const getReaderButton = document.getElementById('get-reader');
+        const wheel = document.getElementById( 'wheel' );
+        const dimmer = document.getElementById( 'dimmer' );
+
+        let rotation = 0;
+        function renderDemo() {
+            rotation = rotation + parseInt( dimmer.value );
+            wheel.style.rotate = `${ rotation }deg`;
+
+            window.requestAnimationFrame(renderDemo);
+        }
+        window.requestAnimationFrame(renderDemo);
+
+        async function getReader() {
+            port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 9600 });
+
+            document.querySelector('input').disabled = false;
+            document.querySelector('figure').classList.remove('fadeOut');
+            document.querySelector('figure').classList.add('bounceIn');
+
+            dimmer.addEventListener('input', (event) => {
+                if (port && port.writable) {
+                    const value = parseInt(event.target.value);
+                    const bytes = new Uint8Array([value]);
+                    const writer = port.writable.getWriter();
+                    console.log(value)
+
+                    writer.write(bytes);
+                    writer.releaseLock();
+                }
+            });
+        }
+        getReaderButton.addEventListener('click', () => getReader());
+    </script>
+</body>
+</html>
